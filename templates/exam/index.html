@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en" dir="ltr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Online Examination System</title>
+    <style>
+        /* Internal CSS */
+        body {
+            margin: 0; /* Remove default margin */
+            font-family: Arial, sans-serif; /* Set a default font */
+            margin-bottom: 0;
+            background-image: url('p1.png');
+            background-size: cover;
+            color: white; /* Ensures text is readable */
+            height: 100vh; /* Covers full viewport height */
+            position: relative; /* Needed for overlay (if used) */
+        }
+
+        .jumbotron {
+            margin-bottom: 0;
+            background: url("{% static 'p1.png' %}") no-repeat center center; /* Update with your actual path */
+            background-size: cover;
+            color: white; /* Ensures text is readable */
+            height: 100vh; /* Covers full viewport height */
+            position: relative; /* Needed for overlay (if used) */
+        }
+
+        /* Optional: Add a dark overlay to enhance text visibility */
+        .jumbotron::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5); /* Semi-transparent overlay */
+            z-index: 1;
+        }
+
+        .jumbotron .container {
+            position: relative;
+            z-index: 2; /* Ensures text appears above the overlay */
+        }
+
+        .btn {
+            border-radius: 0; /* Keep button square */
+        }
+    </style>
+</head>
+
+<body>
+    {% include "exam/navbar.html" %}
+    <br>
+    <section id="section-jumbotron" class="jumbotron jumbotron-fluid d-flex justify-content-center align-items-center">
+        <div class="container text-center">
+            <h2 class="display-3 text-info">Welcome to Online Examination System</h2>
+            <p class="display-4 d-none d-sm-block">Attend your examinations online!</p>
+            <p class="lead">Sign Up now to start your first online examination</p>
+            <p><strong>Start Your Journey Here:</strong></p>
+            <a href="/student/studentsignup" class="btn btn-lg btn-info">
+                <i class="fa fa-graduation-cap" aria-hidden="true"></i> Sign Up as Student
+            </a>
+            <br><br><br>
+        </div>  
+    </section>
+    {% include "exam/footer.html" %}
+</body>
+
+</html>

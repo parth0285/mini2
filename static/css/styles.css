@@ -1,0 +1,16 @@
+body {
+    background-image: url('{{ STATIC_URL }}images/background.jpg');
+    background-size: cover;
+    margin: 0;
+    padding: 0;
+}
+
+/* Styles for the navbar */
+.navbar {
+    /* Your navbar styles here */
+}
+
+/* Styles for the footer */
+.footer {
+    /* Your footer styles here */
+}

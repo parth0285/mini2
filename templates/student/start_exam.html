@@ -1,0 +1,179 @@
+{% extends 'student/studentbase.html' %}
+{% block content %}
+{% load static %}
+
+<head>
+  <link href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
+  <script src="//netdna.bootstrapcdn.com/bootstrap/3.0.0/js/bootstrap.min.js"></script>
+  <script src="//code.jquery.com/jquery-1.11.1.min.js"></script>
+
+  <style>
+    body {
+      background-color: #f7f7f7;
+    }
+    .jumbotron {
+      padding: 50px;
+      background-color: #dff0d8;
+    }
+  </style>
+
+  <script>
+    // Function to automatically request fullscreen
+    function enterFullscreen() {
+      var docElm = document.documentElement;
+
+      // Check for the available methods across browsers
+      if (docElm.requestFullscreen) {
+        docElm.requestFullscreen();
+      } else if (docElm.mozRequestFullScreen) { // Firefox
+        docElm.mozRequestFullScreen();
+      } else if (docElm.webkitRequestFullscreen) { // Chrome, Safari, Opera
+        docElm.webkitRequestFullscreen();
+      } else if (docElm.msRequestFullscreen) { // IE/Edge
+        docElm.msRequestFullscreen();
+      }
+    }
+
+    // Attempt to trigger fullscreen on page load, with a slight delay
+    window.onload = function() {
+      setTimeout(function() {
+        // Try to enter fullscreen
+        enterFullscreen();
+      }, 1000); // Delay to ensure the page is fully loaded
+
+      // In case fullscreen doesn't trigger automatically, allow user click to enable fullscreen
+      document.body.addEventListener('click', function() {
+        enterFullscreen();  // If the user clicks anywhere, trigger fullscreen
+      });
+    };
+
+    // Disable right-click and prevent copying content
+    document.addEventListener("contextmenu", function(event) {
+      event.preventDefault();  // Prevent right-click
+    });
+
+    document.addEventListener("copy", function(event) {
+      event.preventDefault();  // Prevent copying content
+    });
+
+    // Alert user about tab switch warning and lock logic
+    alert('Please don\'t switch tabs, you can switch tabs a maximum of 2 times');
+
+    let tabSwitchCount = 0;  // Counter for tab switches
+    const maxTabSwitches = 2;  // Max number of tab switches before locking
+
+    // Lock focus on the current tab
+    document.addEventListener("visibilitychange", function() {
+      if (document.hidden) {
+        tabSwitchCount++;
+
+        // Show warning after the first and second tab switches
+        if (tabSwitchCount < maxTabSwitches) {
+          alert("Warning: You switched tabs! Please stay on this tab to continue the exam.");
+        }
+
+        // Lock the exam after 3 violations
+        if (tabSwitchCount >= maxTabSwitches) {
+          alert("You have switched tabs 3 times. The exam has been locked.");
+          disableExam(); // Disable exam interactions
+        }
+
+        document.title = "You switched tabs!";
+      } else {
+        document.title = "Exam - Continue Answering!";
+      }
+    });
+
+    // Disable the form and inputs after 3 tab switches
+    function disableExam() {
+      let inputs = document.querySelectorAll('input');
+      inputs.forEach(input => {
+        input.disabled = true;  // Disable all input fields
+      });
+
+      let submitButton = document.querySelector('input[type="submit"]');
+      submitButton.disabled = true;  // Disable the submit button
+      submitButton.value = "Exam Locked - You cannot continue!";
+      alert("The exam has been locked due to multiple tab switches. You can no longer submit answers.");
+    }
+
+    // Save answers in cookies before submitting
+    function saveAns() {
+      var ele = document.getElementsByTagName('input');
+      for (i = 0; i < ele.length; i++) {
+        if (ele[i].type === "radio") {
+          if (ele[i].checked) {
+            setCookie(ele[i].name, ele[i].value, 3);
+          }
+        }
+      }
+    }
+
+    // Set cookies for the answers
+    function setCookie(cname, cvalue, exdays) {
+      var d = new Date();
+      d.setTime(d.getTime() + (exdays * 24 * 60 * 60 * 1000));
+      var expires = "expires=" + d.toUTCString();
+      document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
+    }
+
+    // Handle form submission with prevention on lock
+    function handleFormSubmit(event) {
+      if (tabSwitchCount >= maxTabSwitches) {
+        event.preventDefault();  // Prevent form submission if locked
+        alert("The exam has been locked. You cannot submit any more answers.");
+      }
+    }
+
+    // Attach the handleFormSubmit function to the form's submit event
+    document.addEventListener("DOMContentLoaded", function() {
+      let form = document.querySelector('form');
+      form.addEventListener('submit', handleFormSubmit);
+    });
+  </script>
+</head>
+
+<div class="jumbotron my-4">
+  <form class="form" autocomplete="off" onsubmit="return saveAns()" action="/student/calculate-marks" method="POST">
+    {% csrf_token %}
+    <h2 style="text-align: center;">Course: {{ course.course_name }}</h2>
+
+    {% for q in questions %}
+      <h3 class="text-danger">{{ forloop.counter }}. {{ q.question }}</h3>
+      <h4 style="text-align: right;">[{{ q.marks }} Marks]</h4>
+
+      <div class="form-check mx-4">
+        <input class="form-check-input" type="radio" name="{{ forloop.counter }}" id="{{ q.option1 }}" value="Option1">
+        <label class="form-check-label" for="option1">
+          {{ q.option1 }}
+        </label>
+      </div>
+
+      <div class="form-check mx-4">
+        <input class="form-check-input" type="radio" name="{{ forloop.counter }}" id="{{ q.option2 }}" value="Option2">
+        <label class="form-check-label" for="option2">
+          {{ q.option2 }}
+        </label>
+      </div>
+
+      <div class="form-check mx-4">
+        <input class="form-check-input" type="radio" name="{{ forloop.counter }}" id="{{ q.option3 }}" value="Option3">
+        <label class="form-check-label" for="option3">
+          {{ q.option3 }}
+        </label>
+      </div>
+
+      <div class="form-check mx-4">
+        <input class="form-check-input" type="radio" name="{{ forloop.counter }}" id="{{ q.option4 }}" value="Option4">
+        <label class="form-check-label" for="option4">
+          {{ q.option4 }}
+        </label>
+      </div>
+
+    {% endfor %}
+    <input class="btn btn-success btn-lg" style="border-radius: 0%;" type="submit" value="Submit Answers">
+  </form>
+</div>
+
+<br><br><br><br><br><br>
+{% endblock content %}
